@@ -13,8 +13,11 @@ colorama==0.4.4
 flask==2.1.2
     # via
     #   -r requirements.in
+    #   flask-marshmallow
     #   flask-migrate
     #   flask-sqlalchemy
+flask-marshmallow==0.14.0
+    # via -r requirements.in
 flask-migrate==3.1.0
     # via -r requirements.in
 flask-sqlalchemy==2.5.1
@@ -39,12 +42,25 @@ markupsafe==2.1.1
     # via
     #   jinja2
     #   mako
+marshmallow==3.15.0
+    # via
+    #   flask-marshmallow
+    #   marshmallow-sqlalchemy
+marshmallow-sqlalchemy==0.28.0
+    # via -r requirements.in
+packaging==21.3
+    # via marshmallow
+pyparsing==3.0.9
+    # via packaging
 python-dotenv==0.20.0
     # via -r requirements.in
+six==1.16.0
+    # via flask-marshmallow
 sqlalchemy==1.4.36
     # via
     #   alembic
     #   flask-sqlalchemy
+    #   marshmallow-sqlalchemy
 werkzeug==2.1.2
     # via flask
 zipp==3.8.0

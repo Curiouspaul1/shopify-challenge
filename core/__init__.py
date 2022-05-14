@@ -1,6 +1,6 @@
 from flask import Flask
 from extensions import (
-    db, migrate
+    db, migrate, ma
 )
 from config import config_options
 
@@ -21,7 +21,13 @@ def create_app(config_name: str) -> Flask:
     # configure extensions with app instance
     db.init_app(app)
     migrate.init_app(app, db)
+    ma.init_app(app)
 
     # register flask blueprints
+    from .admin import admin
+    from .shipment import shipment
+
+    app.register_blueprint(shipment, url_prefix='/shipment')
+    app.register_blueprint(admin, url_prefix='/admin')
 
     return app

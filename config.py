@@ -10,6 +10,7 @@ class Config:
     """
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("app-secret")
+    POSTS_PER_PAGE = 10  # for pagination purposes
 
 
 class DevConfig(Config):
