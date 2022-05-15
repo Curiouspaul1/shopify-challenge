@@ -2,7 +2,14 @@ from core import db
 
 
 class BaseModel:
-    id = db.Column(db.Integer, autoincrement=True)
+    seq = db.Sequence(
+        'id', increment=1,
+        metadata=db.Model.metadata
+    )
+    id = db.Column(
+        db.Integer, seq,
+        server_default=seq.next_value()
+    )
 
 
 class BaseModelPR:

@@ -45,7 +45,7 @@ def edit_parcel(parcel_id):
         resp['data'] = ''
         status_code = 404
     else:
-        for key, val in data:
+        for key, val in data.items():
             setattr(parcel, key, val)
         db.session.commit()
         resp['status'] = 'success'
@@ -74,7 +74,7 @@ def delete_parcel(parcel_id):
     return resp, status_code
 
 
-@admin.get('/parcel/<page>')
+@admin.get('/parcels/<page>')
 def get_parcels(page: Optional[int] = 1):
     page = int(page)
     parcels = Parcel.query.order_by(Parcel.id).paginate(
@@ -83,7 +83,24 @@ def get_parcels(page: Optional[int] = 1):
     resp, status_code = {
         'status': 'success',
         'msg': 'fetched parcels',
-        'data': parcels_schema.dump(parcels)
+        'data': parcels_schema.dump(parcels.items)
     }, 200
+
+    return resp, status_code
+
+
+@admin.get('/parcel/<parcel_id>')
+def get_parcel(parcel_id):
+    resp, status_code = {}, None
+    parcel = Parcel.query.filter_by(parcel_id=parcel_id).first()
+    if parcel:
+        resp['status'] = 'success'
+        resp['msg'] = 'fetched parcel'
+        resp['data'] = parcel_schema.dump(parcel)
+        status_code = 200
+    else:
+        resp['status'] = 'error'
+        resp['msg'] = f'parcel with id {parcel_id} not found'
+        resp['data'] = ''
 
     return resp, status_code

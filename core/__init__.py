@@ -1,5 +1,5 @@
 from flask import Flask
-from extensions import (
+from .extensions import (
     db, migrate, ma
 )
 from config import config_options
