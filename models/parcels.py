@@ -1,5 +1,5 @@
 from core import db
-from .base import BaseModel, BaseModelPR
+from .base import BaseModelPR
 from uuid import uuid4
 from typing import Optional, Dict
 from datetime import datetime as dt
@@ -8,10 +8,11 @@ from datetime import datetime as dt
 class Status:
     DELIVERED = 1
     IN_TRANSIT = 2
+    PRE_DISPATCH = 3
 
 
-class Parcel(BaseModel, db.Model):
-    parcel_id = db.Column(db.String, primary_key=True)
+class Parcel(BaseModelPR, db.Model):
+    parcel_id = db.Column(db.String, index=True)
     name = db.Column(db.String(50))
     description = db.Column(db.Text)
     price = db.Column(db.Float)
@@ -19,7 +20,7 @@ class Parcel(BaseModel, db.Model):
     quantity_in_stock = db.Column(db.Integer)
     date_created = db.Column(db.Date, default=dt.utcnow())
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
-    shipment_id = db.Column(db.String, db.ForeignKey('shipment.shipment_id'))
+    shipment_id = db.Column(db.String, db.ForeignKey('shipment.id'))
 
     def __init__(self, params: Optional[Dict] = None, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -38,9 +39,9 @@ class Parcel(BaseModel, db.Model):
         db.session.commit()
 
 
-class Shipment(db.Model):
-    shipment_id = db.Column(db.String, primary_key=True)
-    status = db.Column(db.Integer)
+class Shipment(BaseModelPR, db.Model):
+    shipment_id = db.Column(db.String, index=True)
+    status = db.Column(db.Integer, default=Status.PRE_DISPATCH)
 
     # sets a one-to-one mapping from shipment table to
     # parcel table; this will enable us assign a parcel
@@ -49,7 +50,7 @@ class Shipment(db.Model):
 
     parcel_quantity = db.Column(db.Integer, default=1)
     weight_ = db.Column(db.Float)
-    destination = db.Column(db.String(100))
+    destination = db.Column(db.String(100))  # this could be a code for used as an alias for a warehouse 
     current_location = db.Column(db.String(100))
 
     def __init__(self, params: Optional[Dict] = None, **kwargs) -> None:
@@ -63,10 +64,16 @@ class Shipment(db.Model):
         self.shipment_id = str(uuid4())
 
     @property
-    def weight(self):
-        return self.weight_
+    def status(self):
+        return self.status_
 
-    @weight.setter
+    @status.setter
+    def status(self, value):
+        self.status_ = value
+
+    def update_parcel_stock(self):
+        self.parcel.update_stock(self.parcel_quantity)  # update the inventory for shipped parcel
+
     def set_weight(self):
         self.weight_ = self.parcel.weight * self.parcel_quantity
 

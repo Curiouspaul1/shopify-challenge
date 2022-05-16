@@ -7,12 +7,20 @@
 # flake8: noqa
 
 from core import ma
-from models.parcels import Parcel
+from models.parcels import Parcel, Shipment
 
 
-class ParcelSchema(ma.Schema):
+class ParcelSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Parcel
 
 parcel_schema = ParcelSchema() # for a single object
 parcels_schema = ParcelSchema(many=True)
+
+
+class ShipmentSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Shipment
+
+shipment_schema = ParcelSchema() # for a single object
+shipments_schema = ParcelSchema(many=True)

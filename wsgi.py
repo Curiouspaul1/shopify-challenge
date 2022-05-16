@@ -4,8 +4,7 @@ from core import create_app
 import os
 
 from models import (
-    base, parcels,
-    warehouses
+    base, parcels
 )
 
 app = create_app(os.getenv('APP_CONFIG') or 'default')

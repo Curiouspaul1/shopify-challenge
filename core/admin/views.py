@@ -80,6 +80,7 @@ def get_parcels(page: Optional[int] = 1):
     parcels = Parcel.query.order_by(Parcel.id).paginate(
         page, current_app.config['POSTS_PER_PAGE'], False
     )
+    print(parcels.items)
     resp, status_code = {
         'status': 'success',
         'msg': 'fetched parcels',
