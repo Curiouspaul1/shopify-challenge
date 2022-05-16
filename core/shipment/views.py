@@ -56,7 +56,7 @@ def update_shipment_status(shipment_id, status_no):
         shipment.status = status_no
         db.session.commit()  # commit changes to db
         resp['status'] = 'success'
-        resp['msg'] = f'shipment status updated'
+        resp['msg'] = 'shipment status updated'
         resp['data'] = ''
 
         status_code = 200
