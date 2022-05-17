@@ -63,14 +63,6 @@ class Shipment(BaseModelPR, db.Model):
                 setattr(self, key, val)
         self.shipment_id = str(uuid4())
 
-    @property
-    def status(self):
-        return self.status_
-
-    @status.setter
-    def status(self, value):
-        self.status_ = value
-
     def update_parcel_stock(self):
         self.parcel.update_stock(self.parcel_quantity)  # update the inventory for shipped parcel
 
@@ -79,9 +71,15 @@ class Shipment(BaseModelPR, db.Model):
 
 
 class Category(BaseModelPR, db.Model):
-    name = db.Column(db.String(20))
+    name = db.Column(db.String(20), unique=True)
+    total_no = db.Column(db.Integer)
     parcels = db.relationship('Parcel', backref='category')
 
-    @staticmethod
-    def add_categories():
-        pass
+    def __init__(self, params: Optional[Dict] = None, **kwargs) -> None:
+        super().__init__(**kwargs)
+        if params:
+            for key, val in params.items():
+                setattr(self, key, val)
+        elif len(kwargs.items()) > 0:
+            for key, val in kwargs.items():
+                setattr(self, key, val)

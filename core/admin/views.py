@@ -1,8 +1,9 @@
 from . import admin
 from .. import db
 from flask import request, current_app
-from models.parcels import Parcel
-from schemas import parcel_schema, parcels_schema
+from models.parcels import Parcel, Category
+from schemas import parcel_schema, parcels_schema, category_schema
+from sqlalchemy.exc import IntegrityError
 from typing import Optional
 
 
@@ -14,9 +15,13 @@ def create_product():
     """
     data = request.get_json(force=True)
     resp, status_code = {}, None
+    db.session.begin()  # new db transaction initiated
+    # find the category and assign parcel to it
+    category = Category.query.filter_by(id=data['category_id']).first()
     new_product = Parcel(params=data)
+    new_product.category = category
     db.session.add(new_product)
-    db.session.commit()
+    db.session.commit()  # commit changes to db
 
     resp['status'] = 'success'
     resp['msg'] = 'added new inventory successfully'
@@ -103,5 +108,28 @@ def get_parcel(parcel_id):
         resp['status'] = 'error'
         resp['msg'] = f'parcel with id {parcel_id} not found'
         resp['data'] = ''
+
+    return resp, status_code
+
+
+@admin.post('/category')
+def add_new_category():
+    data = request.get_json()
+    resp, status_code = {}, None
+    new_category = Category(params=data)
+    db.session.add(new_category)
+    try:
+        db.session.commit()
+        resp['status'] = 'success'
+        resp['msg'] = 'added new category'
+        resp['data'] = category_schema.dump(new_category)
+
+        status_code = 201
+    except IntegrityError:
+        resp['status'] = 'failed'
+        resp['msg'] = f"category with name {data['name']} already exists"
+        resp['data'] = ''
+
+        status_code = 500
 
     return resp, status_code

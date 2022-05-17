@@ -41,9 +41,29 @@ def new_shipment(parcel_id):
     return resp, status_code
 
 
-@shipment.patch('/<shipment_id>/status_no')
+@shipment.patch('/<shipment_id>/<status_no>')
 def update_shipment_status(shipment_id, status_no):
+    """
+    updates the shipment status and any additional
+    detail thats sent via json (ideally this should
+    be just a location update). The status describes
+    three states (IN-TRANSIT), (PRE-DISPATCH), and (DELIVERED)
+    each one is associated by a no from 1->n, (where n=3).
+
+    This handler expects a shipment_id and the status number
+    that the shipment is to be updated with, as url parameters
+    but also allows for additional data to be sent via json, in the
+    event that the current location needs to be updated as well.
+
+    The handler exposes a PATCH endo
+    """
     # find shipment object from db
+    data = None
+    try:
+        data = request.get_json()
+    except Exception:
+        pass
+    print(data)
     resp, status_code = {}, None
     shipment = Shipment.query.filter_by(shipment_id=shipment_id).first()
     if not shipment:
@@ -53,10 +73,13 @@ def update_shipment_status(shipment_id, status_no):
 
         status_code = 404
     else:
+        if data:
+            for key, val in data.items():
+                setattr(shipment, key, val)
         shipment.status = status_no
         db.session.commit()  # commit changes to db
         resp['status'] = 'success'
-        resp['msg'] = 'shipment status updated'
+        resp['msg'] = 'shipment details updated'
         resp['data'] = ''
 
         status_code = 200
