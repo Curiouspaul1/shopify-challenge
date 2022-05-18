@@ -18,15 +18,23 @@ def create_product():
     db.session.begin()  # new db transaction initiated
     # find the category and assign parcel to it
     category = Category.query.filter_by(id=data['category_id']).first()
-    new_product = Parcel(params=data)
-    new_product.category = category
-    db.session.add(new_product)
-    db.session.commit()  # commit changes to db
+    if not category:
+        resp['status'] = 'error'
+        resp['msg'] = f"category with id {data['categoty_id']} not found"
+        resp['data'] = ''
+        
+        status_code = 404
+        db.session.rollback()
+    else:
+        new_product = Parcel(params=data)
+        new_product.category = category
+        db.session.add(new_product)
+        db.session.commit()  # commit changes to db
 
-    resp['status'] = 'success'
-    resp['msg'] = 'added new inventory successfully'
-    resp['data'] = parcel_schema.dump(new_product)
-    status_code = 201
+        resp['status'] = 'success'
+        resp['msg'] = 'added new inventory successfully'
+        resp['data'] = parcel_schema.dump(new_product)
+        status_code = 201
 
     return resp, status_code
 
